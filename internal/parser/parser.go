@@ -9,11 +9,6 @@ const genericError = "ERROR\r\n"
 const clientError = "CLIENT_ERROR %s\r\n"
 const serverError = "SERVER_ERROR %s\r\n"
 
-const (
-	storageCommand = iota
-	retrivalCommand
-)
-
 var commandList map[string]commandValidator
 
 func init() {
@@ -33,12 +28,12 @@ type commandValidator interface {
 	Validate(str []string) error
 }
 
-func validateNumberOfArguments(cmds []string, minExpectedCount, maxExpectedCount int) error {
-	if len(cmds) < minExpectedCount {
+func validateNumberOfArguments(args []string, minExpectedCount, maxExpectedCount int) error {
+	if len(args) < minExpectedCount {
 		return fmt.Errorf(clientError, "invalid number of arguments")
 	}
 
-	if maxExpectedCount != 0 && len(cmds) > maxExpectedCount {
+	if maxExpectedCount != 0 && len(args) > maxExpectedCount {
 		return fmt.Errorf(clientError, "too many arguments")
 	}
 
@@ -47,18 +42,18 @@ func validateNumberOfArguments(cmds []string, minExpectedCount, maxExpectedCount
 
 // Validate validate a command input
 func Validate(command string) error {
-	cmds := strings.Split(command, " ")
+	args := strings.Split(command, " ")
 
-	if len(cmds) < 2 {
+	if len(args) < 2 {
 		return fmt.Errorf(clientError, "invalid number of arguments")
 	}
 
-	action := cmds[0]
+	action := args[0]
 	validator, exist := commandList[action]
 
 	if !exist {
 		return fmt.Errorf(clientError, "invalid command: "+action)
 	}
 
-	return validator.Validate(cmds)
+	return validator.Validate(args)
 }
